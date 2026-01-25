@@ -30,24 +30,20 @@ class RecommendationService:
     """ Main service to handle recommendation requests """
 
     def __init__(self):
-        self.crew_manager = None  # Placeholder for crew manager initialization
+        from ..crew.crew_manager import crew_manager
+        self.crew_manager = crew_manager
 
     def get_recommendations(self,user_query:str)->Dict[str,Any]:
         """ Get recommendations based on user query """
         start_time = time.time()
 
         # Step 1: Classify the query
-        classification = query_classifier.classify(user_query)
+        classification = query_classifier.classify_query(user_query)
         print(f"📊 Classification: {classification.category} in {classification.cityName}")
 
 
         # Step 2: Process through crew manager
-        crew_result=self.crew_manager.process_query(
-            query=user_query,
-            category=classification.category,
-            city=classification.cityName,
-            parameters=classification.parameters
-        )
+        crew_result=self.crew_manager.process_query(user_query)
 
         processing_time = time.time() - start_time
         

@@ -80,11 +80,17 @@ async def get_recommendations(request: UserQueryRequest):
             
     except Exception as e:
         logger.error(f"💥 Error: {str(e)}")
+        error_response = ErrorResponse(
+            error=f"Internal server error: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Internal server error: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.post("/category-search", response_model=RecommendationResponse, tags=["Recommendations"])
@@ -134,11 +140,17 @@ async def category_search(request: CategoryQueryRequest):
             
     except Exception as e:
         logger.error(f"💥 Category search error: {str(e)}")
+        error_response = ErrorResponse(
+            error=f"Internal server error: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Internal server error: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.get("/foods", tags=["Data Access"])
@@ -173,11 +185,17 @@ async def get_foods(
         }
         
     except Exception as e:
+        error_response = ErrorResponse(
+            error=f"Error accessing foods: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Error accessing foods: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.get("/foods/{food_id}", tags=["Data Access"])
@@ -210,11 +228,17 @@ async def get_food_by_id(food_id: str):
     except HTTPException:
         raise
     except Exception as e:
+        error_response = ErrorResponse(
+            error=f"Error fetching food: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Error fetching food: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.get("/cities", tags=["Utilities"])
@@ -239,11 +263,17 @@ async def get_cities():
         }
         
     except Exception as e:
+        error_response = ErrorResponse(
+            error=f"Error fetching cities: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Error fetching cities: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.get("/categories", tags=["Utilities"])
@@ -268,28 +298,40 @@ async def get_categories():
         }
         
     except Exception as e:
+        error_response = ErrorResponse(
+            error=f"Error fetching categories: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Error fetching categories: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.get("/classify", tags=["Utilities"])
 async def classify_query(query: str = Query(..., min_length=2)):
     """Classify a query using Ollama."""
     try:
-        classification = query_classifier.classify(query)
+        classification = query_classifier.classify_query(query)
         return {
             "query": query,
             "classification": classification.dict()
         }
     except Exception as e:
+        error_response = ErrorResponse(
+            error=f"Error classifying query: {str(e)}"
+        )
         raise HTTPException(
             status_code=500,
-            detail=ErrorResponse(
-                error=f"Error classifying query: {str(e)}"
-            ).dict()
+            detail={
+                "success": error_response.success,
+                "error": error_response.error,
+                "details": error_response.details,
+                "timestamp": error_response.timestamp.isoformat()
+            }
         )
 
 @router.get("/health/detailed", tags=["Monitoring"])
@@ -317,7 +359,7 @@ async def detailed_health_check():
     
     try:
         # Check Ollama
-        classification = query_classifier.classify("test")
+        classification = query_classifier.classify_query("test")
         health_info["dependencies"]["ollama"] = {
             "status": "healthy",
             "model": query_classifier.llm.model

@@ -67,7 +67,7 @@ class CrewManager:
             Dictionary with recommendations and metadata
         """
         # Step 1: Classify the query
-        classification = query_classifier.classify(user_query)
+        classification = query_classifier.classify_query(user_query)
         
         # Step 2: Create appropriate crew based on category
         if classification.category == "food":
